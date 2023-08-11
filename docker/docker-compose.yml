@@ -1,0 +1,47 @@
+services:
+
+    database:
+        container_name: garciarte-db
+        image: mysql
+        ports:
+            - "${MYSQL_PORT}:3306"
+        networks:
+            - garciarte
+        volumes:
+            - garciarte-db:/var/lib/mysql
+        environment:
+            TZ: "${TIMEZONE}"
+            MYSQL_DATABASE: "${MYSQL_DATABASE}"
+            MYSQL_USER: "${MYSQL_USER}"
+            MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+            MYSQL_ROOT_PASSWORD: "${MYSQL_PASSWORD}"
+
+    php:
+        container_name: garciarte-php
+        build: ./php
+        networks:
+            - garciarte
+        volumes:
+            - ./../:/application
+        depends_on:
+            - database
+
+    nginx:
+        container_name: garciarte-nginx
+        image: nginx:stable
+        ports:
+            - "${NGINX_PORT}:80"
+        volumes:
+            - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf:ro
+            - ./../:/application
+        networks:
+            - garciarte
+        depends_on:
+            - php
+
+volumes:
+    garciarte-db:
+
+networks:
+    garciarte:
+        external: true
