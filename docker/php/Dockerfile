@@ -9,7 +9,13 @@ RUN apt install -y \
     libzip-dev \
     libxml2-dev \
     libpq-dev \
-    libicu-dev
+    libicu-dev \
+    && docker-php-ext-install pdo_mysql \    
+    && docker-php-ext-install zip exif pcntl
+
+RUN apt-get update && apt-get install -y curl gnupg
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
 
 RUN docker-php-ext-install \
         intl \
@@ -34,4 +40,4 @@ RUN chmod +x /usr/local/bin/php-cs-fixer
 
 RUN useradd -ms /sbin/nologin alexander
 
-WORKDIR /var/www/html/garciarte
+WORKDIR "/application"

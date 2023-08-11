@@ -27,6 +27,10 @@
             <li class="nav-item">
                 <a class="nav-link" href="#">Sobre mi</a>
             </li>
+            </li>
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="#">Gestión</a>
+            </li> -->
         </ul>
     </div>
 </nav>
