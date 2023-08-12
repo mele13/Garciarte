@@ -23,7 +23,8 @@ Route::prefix('/gestion')->group(function () {
     Route::view('', 'admin.adminView');
     Route::view('/imagenes', 'admin.projectImages');
 
-    Route::match(['get', 'post'], '/subir-imagen', [ImageController::class, 'showUploadForm']);
+    Route::get('/subir-imagen', [ImageController::class, 'showUploadForm'])->name('upload.showForm');
+    Route::post('/subir-imagen', [ImageController::class, 'uploadImage'])->name('upload.image');
     // Route::get('/subir-imagen', [BoardController::class, 'destroy'])->name('boards.destroy');
 });
 

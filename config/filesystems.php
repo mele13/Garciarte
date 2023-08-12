@@ -56,6 +56,11 @@ return [
             'throw' => false,
         ],
 
+        'private_images' => [
+            'driver' => 'local',
+            'root' => storage_path('private_images')
+        ],
+
     ],
 
     /*
