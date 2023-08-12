@@ -8,35 +8,92 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Models\Image;
 
+// ACCEPT GIF???
+
 class ImageController extends Controller
 {
+    protected $privateImagesPath;
+
+    public function __construct()
+    {
+        $this->privateImagesPath = Storage::disk('private_images');
+    }
+
     public function showUploadForm()
     {
         return view('partials/_uploadImage');
     }
 
     public function uploadImage(Request $request)
-    {        
-        \Log::info('Request received - upload file', [
-            'name' => $request->hasFile('uploadfile'),
-            // $filename = $$request->hasFile('uploadfile')->getClientOriginalName()
-        ]);
+    {
+        $uploadedImagesInfo = $this->processUploadedImages($request);
 
-        if ($request->hasFile('uploadfile')) {
-            $file = $request->file('uploadfile');
-            $filename = $file->getClientOriginalName();
-            // $file->storeAs('private_images', $filename);
-            $path = Storage::disk('private_images')->putFileAs('', $file, $filename);
+        return redirect()->back()->with($uploadedImagesInfo);
+    }
 
-            // dd($filename, $request->all());
+    /*
+    -----------------------------------------------------------------------------------
+    ------------------------------- Protected functions ------------------------------- 
+    -----------------------------------------------------------------------------------
+    */
 
-            // Image::create([
-            //     'filename' => $filename,
-            // ]);
+    protected function processUploadedImages(Request $request)
+    {
+        $totalImages = 0;
+        $uploadedImages = 0;
+        $duplicateImages = 0;
+        $duplicateImageNames = [];
 
-            return redirect()->back()->with('success', 'Image uploaded successfully.');
+        if (!$request->hasFile('uploadfiles')) {
+            return ['errorMessage' => 'No se seleccionaron imágenes'];
         }
 
-        return redirect()->back()->with('error', 'No image selected.');
+        $files = $request->file('uploadfiles');
+
+        foreach ($files as $file) {
+            $totalImages++;
+
+            $hash = hash_file('sha256', $file->getRealPath());
+            $existingImage = Image::where('hash', $hash)->first();
+
+            if ($existingImage) {
+                $duplicateImages++;
+                $duplicateImageNames[] = $file->getClientOriginalName();
+            } else {
+                $filename = $this->generateUniqueFilename($file->getClientOriginalName());
+                $this->privateImagesPath->putFileAs('', $file, $filename);
+
+                Image::create([
+                    'filename' => $filename,
+                    'hash' => $hash,
+                ]);
+
+                $uploadedImages++;
+            }
+        }
+
+        $successMessage = '';
+        $errorMessage = '';
+
+        if ($uploadedImages > 0) {
+            $successMessage = "Se ha" . ($uploadedImages > 1 ? 'n' : '') . " cargado $uploadedImages imagen" . ($uploadedImages > 1 ? 'es' : '') . " con éxito";
+        }
+
+        if ($duplicateImages > 0) {
+            $errorMessage = " $duplicateImages imagen" . ($duplicateImages > 1 ? 'es' : '') . " duplicada" . ($duplicateImages > 1 ? 's' : '') . " encontrada" . ($duplicateImages > 1 ? 's' : '') . ": " . implode(', ', $duplicateImageNames);
+        }
+
+        return ['successMessage' => $successMessage, 'errorMessage' => $errorMessage];
+    }
+
+    protected function generateUniqueFilename($originalFilename)
+    {
+        $timestamp = now()->format('Y-m-d_H-i-s'); // Format: Year-Month-Day_Hour-Minute-Second
+        $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+        $basename = pathinfo($originalFilename, PATHINFO_FILENAME);
+        $newFilename = $basename . '_' . $timestamp . '.' . $extension;
+
+        return $newFilename;
     }
 }
+
