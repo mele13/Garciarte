@@ -20,6 +20,9 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 
+    <!-- Font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <!-- Additional links -->
     @yield('additional_links')
 </head>
@@ -29,6 +32,7 @@
     <div class="container">
         @yield('content')        
     </div>
+    <footer>@include('partials/_footer')</footer>
 </body>
 
 </html>

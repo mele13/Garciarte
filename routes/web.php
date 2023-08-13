@@ -21,7 +21,10 @@ Route::get('/', function () {
 
 Route::prefix('/gestion')->group(function () {
     Route::view('', 'admin.adminView');
-    Route::view('/imagenes', 'admin.projectImages');
+    // Route::view('/imagenes', 'admin.projectImages')->name('images.managerView');
+    
+    Route::get('/imagenes', [ImageController::class, 'index'])->name('images.showAll');
+    Route::get('storage/private_images/{filename}', [ImageController::class, 'showImage'])->name('image.show');
 
     Route::get('/subir-imagen', [ImageController::class, 'showUploadForm'])->name('upload.showForm');
     Route::post('/subir-imagen', [ImageController::class, 'uploadImage'])->name('upload.image');

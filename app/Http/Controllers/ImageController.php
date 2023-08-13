@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Response;
 
 use App\Models\Image;
-
-// ACCEPT GIF???
 
 class ImageController extends Controller
 {
@@ -17,6 +16,20 @@ class ImageController extends Controller
     public function __construct()
     {
         $this->privateImagesPath = Storage::disk('private_images');
+    }
+    
+    public function index()
+    {
+        $images = Image::all();
+
+        return view('admin.projectImages', ['images' => $images]);
+    }
+
+    public function showImage($filename)
+    {
+        $filePath = Storage::disk('private_images')->path($filename);
+        
+        return response()->file($filePath);
     }
 
     public function showUploadForm()
